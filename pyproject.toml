@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexus-tikr"
+version = "2.1.0"
+description = "NEXUS-TIKR v2.1 — Financial Data Processor for TiKR XLSX exports"
+requires-python = ">=3.9"
+dependencies = [
+    "openpyxl>=3.1.0",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+nexus-tikr = "nexus_tikr.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["nexus_tikr*"]
