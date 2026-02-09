@@ -293,6 +293,7 @@ def _build_meta(ctx: PipelineContext) -> str:
         f"      L2: {lh.counts.get(MatchLevel.CASE_INSENSITIVE, 0)}",
         f"      L3: {lh.counts.get(MatchLevel.WHITESPACE_NORMALIZED, 0)}",
         f"      L4: {lh.counts.get(MatchLevel.SPECIAL_CHAR_NORMALIZED, 0)}",
+        f"      L5_alias: {lh.counts.get(MatchLevel.ALIAS, 0)}",
         f"      not_found: {lh.counts.get(MatchLevel.NOT_FOUND, 0)}",
         f"    format_drift_warning: {str(lh.format_drift_warning).lower()}",
     ])

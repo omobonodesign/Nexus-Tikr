@@ -93,9 +93,12 @@ def detect_file_type(ws: openpyxl.worksheet.worksheet.Worksheet) -> tuple[FileTy
 def detect_date_columns(
     ws: openpyxl.worksheet.worksheet.Worksheet,
     file_type: FileTypeID,
-    header_row: int = 1,
+    header_row: int = 0,
 ) -> tuple[dict[str, int], Optional[int], bool]:
     """Module 1.4: Detect date/fiscal year columns and LTM column.
+
+    Auto-scans rows 1-5 to find the header row with date values.
+    If header_row is explicitly set (>0), uses that row only.
 
     Returns:
         (date_columns, ltm_col, ltm_available)
@@ -103,6 +106,36 @@ def detect_date_columns(
         ltm_col: column index of LTM column or None
         ltm_available: whether LTM column exists
     """
+    # Auto-detect header row by scanning rows 1-5
+    if header_row <= 0:
+        best_row = 0
+        best_count = 0
+        for candidate_row in range(1, min(6, (ws.max_row or 0) + 1)):
+            count = 0
+            for col in range(2, (ws.max_column or 0) + 1):
+                cell_val = ws.cell(row=candidate_row, column=col).value
+                if cell_val is None:
+                    continue
+                cell_str = str(cell_val).strip()
+                if "LTM" in cell_str.upper():
+                    count += 1
+                    continue
+                dt = _parse_date_value(cell_val)
+                if dt:
+                    count += 1
+                    continue
+                if re.match(r"^(19|20)\d{2}$", cell_str):
+                    count += 1
+            if count > best_count:
+                best_count = count
+                best_row = candidate_row
+        if best_row == 0:
+            logger.warning("No date columns found in rows 1-5 for %s", file_type.value)
+            return {}, None, False
+        header_row = best_row
+        logger.debug("Auto-detected header row %d with %d date columns for %s",
+                      header_row, best_count, file_type.value)
+
     date_columns: dict[str, int] = {}
     ltm_col: Optional[int] = None
     ltm_available = False
@@ -150,34 +183,47 @@ def detect_date_columns_actuals_forward(
     ae_markers: dict[str, str] = {}
     cagr_col: Optional[int] = None
 
-    # Row 2 has the "Actuals & Forward Estimates" header
-    # Row 3 typically has date headers with A/E markers
-    # Try row 2 first for column headers, then row 3
-    header_row = 2
-    marker_row = None
-
     # Find the row with A/E markers
-    for r in range(2, min(6, ws.max_row + 1)):
-        for c in range(2, ws.max_column + 1):
+    marker_row = None
+    for r in range(1, min(8, (ws.max_row or 0) + 1)):
+        ae_count = 0
+        for c in range(2, (ws.max_column or 0) + 1):
             val = _safe_cell_str(ws, r, c)
             if val and val.strip() in ("A", "E"):
-                marker_row = r
-                break
-        if marker_row:
+                ae_count += 1
+        if ae_count >= 2:  # At least 2 A/E markers = confirmed
+            marker_row = r
             break
 
-    # Find date row (usually one row above marker row, or row 1)
-    date_row = 1
-    if marker_row and marker_row > 1:
-        # Check the row above marker for dates
-        for c in range(2, ws.max_column + 1):
-            val = ws.cell(row=marker_row - 1, column=c).value
-            dt = _parse_date_value(val)
+    # Auto-detect date row: scan rows 1-6 for the row with most dates
+    best_date_row = 0
+    best_date_count = 0
+    for candidate in range(1, min(7, (ws.max_row or 0) + 1)):
+        if candidate == marker_row:
+            continue  # Skip the A/E marker row
+        count = 0
+        for c in range(2, (ws.max_column or 0) + 1):
+            cell_val = ws.cell(row=candidate, column=c).value
+            if cell_val is None:
+                continue
+            cell_str = str(cell_val).strip()
+            if cell_str.upper() == "CAGR":
+                count += 1
+                continue
+            dt = _parse_date_value(cell_val)
             if dt:
-                date_row = marker_row - 1
-                break
+                count += 1
+                continue
+            if re.match(r"^(19|20)\d{2}$", cell_str):
+                count += 1
+        if count > best_date_count:
+            best_date_count = count
+            best_date_row = candidate
 
-    for col in range(2, ws.max_column + 1):
+    date_row = best_date_row if best_date_row > 0 else 1
+    logger.debug("AF date_row=%d (count=%d), marker_row=%s", date_row, best_date_count, marker_row)
+
+    for col in range(2, (ws.max_column or 0) + 1):
         cell_val = ws.cell(row=date_row, column=col).value
         if cell_val is None:
             continue
@@ -198,15 +244,48 @@ def detect_date_columns_actuals_forward(
                 marker = _safe_cell_str(ws, marker_row, col)
                 if marker and marker.strip() in ("A", "E"):
                     ae_markers[year_label] = marker.strip()
+            continue
+
+        # Try year-like pattern
+        if re.match(r"^(19|20)\d{2}$", cell_str):
+            date_columns[cell_str] = col
+            if marker_row:
+                marker = _safe_cell_str(ws, marker_row, col)
+                if marker and marker.strip() in ("A", "E"):
+                    ae_markers[cell_str] = marker.strip()
 
     return date_columns, ae_markers, cagr_col
 
 
 def detect_multiples_date_columns(
     ws: openpyxl.worksheet.worksheet.Worksheet,
-    header_row: int = 1,
+    header_row: int = 0,
 ) -> dict[str, int]:
-    """Detect date columns for Multiples file (datetime snapshots)."""
+    """Detect date columns for Multiples file (datetime snapshots).
+
+    Auto-scans rows 1-5 if header_row is not specified.
+    """
+    # Auto-detect header row
+    if header_row <= 0:
+        best_row = 0
+        best_count = 0
+        for candidate in range(1, min(6, (ws.max_row or 0) + 1)):
+            count = 0
+            for col in range(2, (ws.max_column or 0) + 1):
+                cell_val = ws.cell(row=candidate, column=col).value
+                if cell_val is not None:
+                    dt = _parse_date_value(cell_val)
+                    if dt:
+                        count += 1
+            if count > best_count:
+                best_count = count
+                best_row = candidate
+        if best_row == 0:
+            logger.warning("No date columns found for Multiples file")
+            return {}
+        header_row = best_row
+        logger.debug("Multiples auto-detected header row %d with %d dates", header_row, best_count)
+
     date_columns: dict[str, int] = {}
 
     for col in range(2, ws.max_column + 1):
