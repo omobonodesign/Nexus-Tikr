@@ -299,7 +299,7 @@ def build_file_info(filepath: str) -> FileInfo:
         date_cols = detect_multiples_date_columns(ws)
         info.date_columns = date_cols
     elif file_type not in (FileTypeID.TIKR_STREET_TARGETS, FileTypeID.UNKNOWN):
-        date_cols, ltm_col, ltm_avail = detect_date_columns(ws)
+        date_cols, ltm_col, ltm_avail = detect_date_columns(ws, file_type)
         info.date_columns = date_cols
         info.ltm_col = ltm_col
         info.ltm_available = ltm_avail
