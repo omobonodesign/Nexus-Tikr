@@ -165,10 +165,18 @@ class TestSemanticLabelEngineMatching:
         assert row == 5
 
     def test_not_found(self):
-        ws = _make_mock_ws({5: "Revenue"})
+        ws = _make_mock_ws({5: "Something Unrelated"})
         engine = SemanticLabelEngine(ws)
         row = engine.find_label("Total Revenues")
         assert row is None
+
+    def test_alias_match(self):
+        """Alias matching: 'Revenue' is a known alias for 'Total Revenues'."""
+        ws = _make_mock_ws({5: "Revenue"})
+        engine = SemanticLabelEngine(ws)
+        row = engine.find_label("Total Revenues")
+        assert row == 5
+        assert engine.label_health.counts[MatchLevel.ALIAS] == 1
 
     def test_label_health_tracking(self):
         ws = _make_mock_ws({5: "Total Revenues", 10: "Missing Label"})

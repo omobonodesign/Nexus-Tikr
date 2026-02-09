@@ -34,6 +34,7 @@ class MatchLevel(enum.Enum):
     WHITESPACE_NORMALIZED = 3
     SPECIAL_CHAR_NORMALIZED = 4
     NOT_FOUND = 5
+    ALIAS = 6
 
 
 class LabelImpact(enum.Enum):
@@ -128,6 +129,7 @@ class LabelHealth:
         MatchLevel.CASE_INSENSITIVE: 0,
         MatchLevel.WHITESPACE_NORMALIZED: 0,
         MatchLevel.SPECIAL_CHAR_NORMALIZED: 0,
+        MatchLevel.ALIAS: 0,
         MatchLevel.NOT_FOUND: 0,
     })
     total_expected: int = 0
@@ -141,6 +143,7 @@ class LabelHealth:
             MatchLevel.CASE_INSENSITIVE: 0.95,
             MatchLevel.WHITESPACE_NORMALIZED: 0.85,
             MatchLevel.SPECIAL_CHAR_NORMALIZED: 0.75,
+            MatchLevel.ALIAS: 0.90,
         }
         score = sum(
             self.counts.get(level, 0) * w

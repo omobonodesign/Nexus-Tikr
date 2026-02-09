@@ -8,6 +8,7 @@ from typing import Any, Optional
 
 import openpyxl
 
+from nexus_tikr.constants import LABEL_ALIASES
 from nexus_tikr.models import (
     LabelHealth,
     LabelImpact,
@@ -91,6 +92,23 @@ class SemanticLabelEngine:
 
                 return row
 
+        # Try alias matching as fallback (Level 5: ALIAS)
+        row = self._match_alias(label_key, start_row, end_row, after_row)
+        if row is not None:
+            self.label_health.counts[MatchLevel.ALIAS] = (
+                self.label_health.counts.get(MatchLevel.ALIAS, 0) + 1
+            )
+            raw_label = self._col_a_cache.get(row, "")
+            self.label_health.found_with_variant.append(LabelMatch(
+                label_key=label_key,
+                source_label_raw=raw_label,
+                match_level=MatchLevel.ALIAS,
+                row_number=row,
+                normalization_applied=f"ALIAS: {raw_label.strip()}",
+            ))
+            logger.debug("Alias match: '%s' -> '%s' at row %d", label_key, raw_label.strip(), row)
+            return row
+
         # Not found
         self.label_health.counts[MatchLevel.NOT_FOUND] = (
             self.label_health.counts.get(MatchLevel.NOT_FOUND, 0) + 1
@@ -120,12 +138,17 @@ class SemanticLabelEngine:
         if end_row is None:
             end_row = self.max_row
 
-        # First find the anchor label
+        # First find the anchor label via standard matching
         anchor_row = self._match_at_level(after_label, MatchLevel.EXACT, start_row, end_row)
         if anchor_row is None:
             anchor_row = self._match_at_level(after_label, MatchLevel.CASE_INSENSITIVE, start_row, end_row)
         if anchor_row is None:
             anchor_row = self._match_at_level(after_label, MatchLevel.WHITESPACE_NORMALIZED, start_row, end_row)
+        if anchor_row is None:
+            anchor_row = self._match_at_level(after_label, MatchLevel.SPECIAL_CHAR_NORMALIZED, start_row, end_row)
+        # Try aliases for the anchor label
+        if anchor_row is None:
+            anchor_row = self._match_alias(after_label, start_row, end_row)
 
         if anchor_row is None:
             # Anchor not found — can't position the label
@@ -158,7 +181,11 @@ class SemanticLabelEngine:
         start_row: int = 1,
         end_row: Optional[int] = None,
     ) -> Optional[int]:
-        """Find a section header row (e.g., 'Return Ratios:')."""
+        """Find a section header row (e.g., 'Return Ratios:').
+
+        Tries exact match, case-insensitive, and also matches
+        with/without trailing colon for flexibility.
+        """
         if end_row is None:
             end_row = self.max_row
 
@@ -168,7 +195,14 @@ class SemanticLabelEngine:
                 if raw is None:
                     continue
                 stripped = raw.strip()
+                # Exact or case-insensitive
                 if stripped == anchor_text or stripped.lower() == anchor_text.lower():
+                    return row
+                # Try without trailing colon (source has colon, anchor doesn't or vice versa)
+                stripped_no_colon = stripped.rstrip(":")
+                anchor_no_colon = anchor_text.rstrip(":")
+                if (stripped_no_colon.lower() == anchor_no_colon.lower()
+                        and stripped_no_colon):
                     return row
         return None
 
@@ -291,6 +325,31 @@ class SemanticLabelEngine:
 
             if self._matches(raw, label_key, level):
                 return row
+        return None
+
+    def _match_alias(
+        self,
+        label_key: str,
+        start_row: int,
+        end_row: int,
+        after_row: Optional[int] = None,
+    ) -> Optional[int]:
+        """Try to match using known aliases for the label.
+
+        Looks up the label_key in LABEL_ALIASES and tries each alias
+        with case-insensitive + special char normalized matching.
+        """
+        aliases = LABEL_ALIASES.get(label_key, [])
+        if not aliases:
+            return None
+
+        for alias in aliases:
+            # Try each alias with progressively looser matching
+            for level in (MatchLevel.EXACT, MatchLevel.CASE_INSENSITIVE,
+                          MatchLevel.SPECIAL_CHAR_NORMALIZED):
+                row = self._match_at_level(alias, level, start_row, end_row, after_row)
+                if row is not None:
+                    return row
         return None
 
     def _matches(self, source: str, target: str, level: MatchLevel) -> bool:

@@ -242,16 +242,17 @@ VALUATION_FORWARD_LABELS = {
     "peg_ratio": ("PEG Ratio", "string_multiple", LabelImpact.IMPORTANT),
 }
 
-# Ratios file section anchors
+# Ratios file section anchors (multiple variants per section)
 RATIOS_SECTION_ANCHORS = {
-    "returns": ["Return Ratios:"],
-    "margins": ["Margin Analysis:"],
-    "efficiency": ["Asset Efficiency:", "Efficiency:"],
-    "liquidity": ["Liquidity:"],
-    "solvency": ["Solvency:"],
-    "per_share": ["Per Share Data:"],
-    "trailing_valuation": ["Trailing Valuation:"],
-    "forward_valuation": ["Forward Valuation:"],
+    "returns": ["Return Ratios:", "Return Ratios", "Returns:", "Returns"],
+    "margins": ["Margin Analysis:", "Margin Analysis", "Margins:", "Profitability:"],
+    "efficiency": ["Asset Efficiency:", "Efficiency:", "Efficiency", "Asset Efficiency",
+                    "Efficiency Ratios:"],
+    "liquidity": ["Liquidity:", "Liquidity", "Liquidity Ratios:"],
+    "solvency": ["Solvency:", "Solvency", "Solvency Ratios:", "Leverage:"],
+    "per_share": ["Per Share Data:", "Per Share Data", "Per Share:", "Per Share Ratios:"],
+    "trailing_valuation": ["Trailing Valuation:", "Trailing Valuation", "Trailing:"],
+    "forward_valuation": ["Forward Valuation:", "Forward Valuation", "Forward:"],
 }
 
 # Multiples labels
@@ -443,4 +444,650 @@ DERIVED_THRESHOLDS = {
     "consensus_upside": {"green": 15.0, "warn_low": 5.0, "warn_high": 10.0},
     "bullish_pct": {"green": 60.0, "warn_low": 30.0, "warn_high": 50.0},
     "beat_rate": {"green": 75.0, "warn_low": 40.0, "warn_high": 60.0},
+}
+
+# ============================================================
+# LABEL ALIASES — Fallback alternative names for label matching
+# ============================================================
+# Maps canonical label -> list of known alternative names.
+# Used when the 4-level strict matching fails, to recover data
+# that exists under a slightly different label name.
+
+LABEL_ALIASES: dict[str, list[str]] = {
+    # --- Income Statement ---
+    "Total Revenues": [
+        "Revenue", "Total Revenue", "Revenues", "Net Revenue", "Net Revenues",
+        "Net Sales", "Sales", "Total Net Revenue", "Total Net Revenues",
+    ],
+    "Cost Of Goods Sold": [
+        "Cost of Revenue", "COGS", "Cost of Sales", "Cost Of Revenue",
+        "Total Cost of Revenue", "Cost of Goods",
+    ],
+    "Gross Profit": ["Gross Income"],
+    "Salaries And Benefits": [
+        "Salaries & Benefits", "Salaries and Benefits",
+        "Compensation and Benefits", "Employee Compensation",
+    ],
+    "Other Operating Expenses": [
+        "Other Oper. Expenses", "SG&A", "Selling General & Admin",
+        "Selling, General & Administrative",
+    ],
+    "Total Operating Expenses": [
+        "Operating Expenses", "Total Oper. Expenses",
+        "Total Operating Costs", "Operating Costs",
+    ],
+    "Operating Income": [
+        "Operating Profit", "Income from Operations",
+        "Income From Operations", "EBIT",
+    ],
+    "Interest Expense": [
+        "Interest Expense, Net", "Net Interest Expense",
+        "Interest Expense Net", "Interest Cost",
+    ],
+    "Interest Income": [
+        "Interest and Investment Income", "Interest & Investment Income",
+    ],
+    "Other Non Operating Income (Expenses)": [
+        "Other Non-Operating Income", "Other Non-Operating",
+        "Non-Operating Income (Expense)", "Other Non Operating Income",
+        "Non Operating Income (Expenses)",
+    ],
+    "Impairment Of Goodwill & Intangibles": [
+        "Impairment of Goodwill", "Goodwill Impairment",
+        "Impairment Charges", "Impairment of Goodwill & Intangibles",
+        "Asset Impairment Charges",
+    ],
+    "Other Unusual Items": [
+        "Other Unusual", "Unusual Items", "Special Items",
+        "Non-Recurring Items",
+    ],
+    "EBT Including Unusual Items": [
+        "EBT Incl. Unusual Items", "Income Before Tax",
+        "Pretax Income", "Earnings Before Taxes",
+        "EBT Incl Unusual Items", "Income Before Taxes",
+        "Pre-Tax Income", "EBT Including Unusual",
+    ],
+    "Income Tax Expense": [
+        "Income Taxes", "Tax Expense", "Provision for Income Taxes",
+        "Income Tax", "Tax Provision",
+    ],
+    "% Effective Tax Rate": [
+        "Effective Tax Rate", "Tax Rate %", "Effective Tax Rate %",
+    ],
+    "Earnings From Continuing Operations": [
+        "Income from Continuing Operations", "Earnings from Cont. Ops",
+        "Income From Continuing Ops",
+    ],
+    "Earnings From Discontinued Operations": [
+        "Income from Discontinued Operations",
+        "Income From Discontinued Ops",
+    ],
+    "Minority Interest Expense": [
+        "Minority Interest", "Non-Controlling Interest Expense",
+        "Noncontrolling Interest",
+    ],
+    "Net Income to Company": [
+        "Net Income", "Net Income to Firm",
+    ],
+    "Net Income to Common Incl Extra Items": [
+        "Net Income to Common", "Net Income Available to Common",
+        "Net Income Attributable to Common", "Net Income (Common)",
+        "Net Income Avail to Common", "Net Income to Common Shareholders",
+        "Net Income Available To Common Shareholders",
+    ],
+    "Diluted EPS": [
+        "EPS (Diluted)", "Earnings Per Share (Diluted)",
+        "EPS Diluted", "Diluted Earnings Per Share",
+    ],
+    "Basic EPS": [
+        "EPS (Basic)", "Earnings Per Share (Basic)",
+        "EPS Basic", "Basic Earnings Per Share",
+    ],
+    "Normalized Diluted EPS": [
+        "Normalized EPS", "Adjusted EPS", "Adj. EPS",
+        "Normalized Earnings Per Share",
+    ],
+    "Dividends Per Share": [
+        "Dividend Per Share", "DPS", "Dividends per Share",
+        "Cash Dividends Per Share",
+    ],
+    "Payout Ratio %": [
+        "Payout Ratio", "Dividend Payout Ratio",
+        "Dividend Payout Ratio %",
+    ],
+    "Weighted Average Diluted Shares Outstanding": [
+        "Diluted Shares Outstanding", "Weighted Avg. Diluted Shares",
+        "Diluted Weighted Average Shares", "Wtd. Avg. Diluted Shares Out.",
+        "Wtd Avg Diluted Shares Out", "Diluted Shares",
+        "Weighted Avg Diluted Shares Outstanding",
+        "Weighted Average Diluted Shares Out.",
+        "Weighted Average Diluted Shares Out",
+    ],
+    "Normalized EBITDA": [
+        "Adjusted EBITDA", "Adj. EBITDA", "Normalized EBITDA (TIKR)",
+    ],
+    "Depreciation & Amortization (from IS Supplemental)": [
+        "Depreciation & Amortization", "D&A",
+        "Depreciation and Amortization", "Depreciation & Amort.",
+        "Depreciation And Amortization",
+    ],
+    "Revenue As Reported": ["Revenue as Reported"],
+    "Operating Income As Reported": ["Operating Income as Reported"],
+    "Net Interest Income": [
+        "Net Interest Inc.", "Net Interest Revenue",
+    ],
+
+    # --- Balance Sheet ---
+    "Cash And Equivalents": [
+        "Cash & Equivalents", "Cash and Cash Equivalents",
+        "Cash & Cash Equivalents", "Cash",
+    ],
+    "Short Term Investments": [
+        "Short-Term Investments", "Marketable Securities",
+        "Current Investments",
+    ],
+    "Total Cash And Short Term Investments": [
+        "Total Cash & Short-Term Investments",
+        "Cash and Short-Term Investments",
+        "Total Cash & Short Term Investments",
+        "Total Cash And Short-Term Investments",
+    ],
+    "Accounts Receivable": [
+        "Trade Receivables", "Trade and Other Receivables",
+        "Receivables", "Accounts Receivable, Net",
+    ],
+    "Total Inventory": [
+        "Inventories", "Inventory", "Total Inventories",
+    ],
+    "Total Current Assets": [
+        "Current Assets, Total", "Current Assets",
+    ],
+    "Net Property Plant And Equipment": [
+        "Net PP&E", "Property, Plant & Equipment, Net",
+        "Property Plant and Equipment Net",
+        "Net Property, Plant and Equipment",
+        "Net Property, Plant & Equipment",
+        "PP&E, Net",
+    ],
+    "Gross Property Plant And Equipment": [
+        "Gross PP&E", "Property, Plant & Equipment, Gross",
+        "Total Property, Plant and Equipment",
+        "Property, Plant & Equipment",
+    ],
+    "Accumulated Depreciation": [
+        "Accum. Depreciation", "Less: Accumulated Depreciation",
+        "Accumulated Depreciation & Amortization",
+    ],
+    "Construction In Progress": [
+        "Construction in Progress", "CIP",
+    ],
+    "Long-term Investments": [
+        "Long-Term Investments", "Long Term Investments",
+        "LT Investments", "Non-Current Investments",
+    ],
+    "Other Intangibles": [
+        "Other Intangible Assets", "Intangible Assets",
+        "Intangibles", "Net Intangible Assets",
+    ],
+    "Accounts Payable": [
+        "Trade Payables", "Trade and Other Payables",
+        "Payables",
+    ],
+    "Current Debt": [
+        "Short-Term Debt", "Short Term Debt",
+        "Current Portion of Long-Term Debt",
+        "Current Portion of LT Debt",
+        "Short-Term Borrowings",
+    ],
+    "Total Current Liabilities": [
+        "Current Liabilities, Total", "Current Liabilities",
+    ],
+    "Long-Term Debt": [
+        "Long Term Debt", "LT Debt", "Non-Current Debt",
+        "Long-term Debt",
+    ],
+    "Long-Term Debt and Capital Leases": [
+        "LT Debt & Capital Leases", "Long-Term Debt & Leases",
+        "Long Term Debt and Capital Leases",
+        "Long-Term Debt And Capital Leases",
+    ],
+    "Deferred Tax Liability Non Current": [
+        "Deferred Tax Liabilities", "Non-Current Deferred Tax",
+        "Deferred Tax Liability", "Deferred Income Taxes",
+    ],
+    "Common Stock": [
+        "Common Stock Par Value", "Common Shares",
+    ],
+    "Retained Earnings": [
+        "Retained Earnings (Deficit)", "Accumulated Deficit",
+    ],
+    "Treasury Stock": [
+        "Treasury Shares", "Treasury stock",
+    ],
+    "Total Common Equity": [
+        "Common Equity", "Total Stockholders' Equity",
+        "Total Shareholders Equity", "Stockholders Equity",
+        "Total Stockholders Equity",
+    ],
+    "Minority Interest": [
+        "Non-Controlling Interest", "Non Controlling Interest",
+        "Noncontrolling Interest", "Noncontrolling Interests",
+    ],
+    "Total Equity": [
+        "Total Shareholders' Equity", "Total Stockholders' Equity",
+        "Shareholders Equity", "Total Shareholders Equity",
+    ],
+    "Total Shares Out. on Filing Date": [
+        "Shares Outstanding", "Total Shares Outstanding",
+        "Common Shares Outstanding", "Shares Out. on Filing Date",
+        "Total Shares Out on Filing Date",
+    ],
+    "Net Debt": ["Net Financial Debt"],
+
+    # --- Cash Flow ---
+    "Depreciation": [
+        "Depreciation Expense",
+    ],
+    "Total Depreciation & Amortization": [
+        "Depreciation & Amortization", "D&A",
+        "Depreciation and Amortization", "Total D&A",
+        "Depreciation And Amortization",
+    ],
+    "Change In Inventories": [
+        "Decrease (Increase) in Inventories", "Change in Inventories",
+        "(Increase) Decrease in Inventories",
+    ],
+    "Change In Payable": [
+        "Increase (Decrease) in Payables", "Change in Accounts Payable",
+        "Change in Payables", "Increase (Decrease) in Accounts Payable",
+    ],
+    "Other CFO Items": [
+        "Other Operating Activities", "Other CFO",
+    ],
+    "Cash from Operations": [
+        "Cash From Operating Activities", "Operating Cash Flow",
+        "Net Cash from Operations", "Net Cash From Operating Activities",
+        "Cash Flow from Operations",
+    ],
+    "Memo: Change in Net Working Capital": [
+        "Change in Working Capital", "Change in Net Working Capital",
+        "Changes in Working Capital",
+    ],
+    "Capital Expenditure": [
+        "Capital Expenditures", "CapEx", "CAPEX",
+        "Purchases of Property, Plant and Equipment",
+        "Purchases of PP&E",
+    ],
+    "Cash Acquisitions": [
+        "Acquisitions", "Business Acquisitions",
+        "Acquisition of Businesses",
+    ],
+    "Investment in Marketable and Equity Securities": [
+        "Purchases of Investments", "Investment Securities",
+        "Purchase of Investments",
+    ],
+    "Other CFI Items": [
+        "Other Investing Activities", "Other CFI",
+    ],
+    "Cash from Investing": [
+        "Cash From Investing Activities", "Net Cash from Investing",
+        "Net Cash From Investing Activities",
+        "Cash Flow from Investing",
+    ],
+    "Total Debt Issued": [
+        "Proceeds from Debt", "Debt Issued", "Issuance of Debt",
+        "Proceeds from Borrowings",
+    ],
+    "Total Debt Repaid": [
+        "Debt Repaid", "Repayment of Debt", "Repayments of Debt",
+        "Debt Repayment",
+    ],
+    "Issuance of Common Stock": [
+        "Proceeds from Issuance of Stock", "Issuance of Stock",
+        "Stock Issuance",
+    ],
+    "Repurchase of Common Stock": [
+        "Stock Repurchases", "Share Repurchases", "Buybacks",
+        "Purchase of Common Stock", "Share Buybacks",
+    ],
+    "Total Dividends Paid": [
+        "Dividends Paid", "Cash Dividends Paid",
+        "Payment of Dividends",
+    ],
+    "Other Financing Activities": [
+        "Other Financing", "Other CFF Items",
+    ],
+    "Cash from Financing": [
+        "Cash From Financing Activities", "Net Cash from Financing",
+        "Net Cash From Financing Activities",
+        "Cash Flow from Financing",
+    ],
+    "Changes In Cash": [
+        "Change in Cash", "Net Change in Cash",
+        "Net Increase (Decrease) in Cash",
+    ],
+    "Foreign Exchange Rate Adjustments": [
+        "FX Adjustments", "Effect of Exchange Rate Changes",
+        "Effect of FX on Cash", "Foreign Exchange Effects",
+    ],
+    "Cash and Cash Equivalents, Beginning of Period": [
+        "Cash, Beginning of Period", "Beginning Cash",
+        "Cash at Beginning of Period",
+    ],
+    "Cash and Cash Equivalents, End of Period": [
+        "Cash, End of Period", "Ending Cash",
+        "Cash at End of Period",
+    ],
+    "Free Cash Flow": ["FCF", "Free cash flow"],
+    "% Free Cash Flow Margins": [
+        "FCF Margin %", "Free Cash Flow Margin",
+        "Free Cash Flow Margins", "% FCF Margins",
+        "% Free Cash Flow Margin",
+    ],
+    "Cash Flow from Operations before NWC": [
+        "CFO before NWC", "Cash from Ops before NWC",
+    ],
+
+    # --- Ratios: Returns ---
+    "Return on Assets %": [
+        "Return on Assets", "ROA %", "ROA",
+        "Return On Assets %",
+    ],
+    "Return on Invested Capital %": [
+        "Return on Invested Capital", "ROIC %", "ROIC",
+    ],
+    "Return On Equity %": [
+        "Return on Equity", "ROE %", "ROE",
+        "Return on Equity %",
+    ],
+    "Normalized ROIC %": [
+        "Normalized ROIC", "Adjusted ROIC", "Adj. ROIC",
+    ],
+
+    # --- Ratios: Margins ---
+    "Gross Profit Margin %": [
+        "Gross Margin %", "Gross Margin", "Gross Profit Margin",
+    ],
+    "EBITDA Margin %": [
+        "EBITDA Margin", "EBITDA Margins %",
+    ],
+    "EBIT Margin %": [
+        "EBIT Margin", "Operating Margin %", "Operating Margin",
+    ],
+    "EBT Margin %": [
+        "EBT Margin", "Pre-Tax Margin %",
+    ],
+    "Net Income Margin %": [
+        "Net Margin %", "Net Margin", "Net Income Margin",
+        "Net Profit Margin %", "Net Profit Margin",
+    ],
+    "Normalized Net Income Margin %": [
+        "Normalized Net Margin", "Adj. Net Income Margin",
+    ],
+    "Effective Tax Rate %": [
+        "Effective Tax Rate", "ETR", "Tax Rate",
+    ],
+    "Free Cash Flow Margin %": [
+        "FCF Margin %", "FCF Margin", "Free Cash Flow Margin",
+    ],
+    "Free / Net Income %": [
+        "FCF / Net Income", "Free Cash Flow / Net Income",
+        "FCF/NI", "FCF / NI",
+    ],
+    "Capex / Sales %": [
+        "CapEx/Sales", "Capital Expenditure / Sales",
+        "Capex / Revenue %", "CapEx / Sales",
+    ],
+    "Capex / EBITDA %": [
+        "CapEx/EBITDA", "Capital Expenditure / EBITDA",
+        "CapEx / EBITDA",
+    ],
+
+    # --- Ratios: Efficiency ---
+    "Asset Turnover": ["Total Asset Turnover"],
+    "Fixed Assets Turnover": ["Fixed Asset Turnover"],
+    "Receivables Turnover": ["Accounts Receivable Turnover"],
+    "Inventory Turnover": ["Inventories Turnover"],
+    "Avg. Days Sales Outstanding": [
+        "Days Sales Outstanding", "DSO",
+        "Avg Days Sales Outstanding",
+    ],
+    "Avg. Days Outstanding Inventory": [
+        "Days Inventory Outstanding", "DIO", "Days Inventory",
+        "Avg Days Outstanding Inventory",
+    ],
+    "Avg. Days Payable Outstanding": [
+        "Days Payable Outstanding", "DPO", "Days Payable",
+        "Avg Days Payable Outstanding",
+    ],
+    "Avg. Cash Conversion Cycle": [
+        "Cash Conversion Cycle", "CCC",
+        "Avg Cash Conversion Cycle",
+    ],
+
+    # --- Ratios: Solvency ---
+    "Assets / Equity": [
+        "Assets to Equity", "Equity Multiplier",
+        "Assets/Equity",
+    ],
+    "Total Debt / Equity": [
+        "Debt to Equity", "Debt/Equity", "D/E Ratio",
+        "Total Debt/Equity",
+    ],
+    "Debt / Assets": [
+        "Debt to Assets", "Total Debt/Assets", "Debt/Assets",
+    ],
+    "Common Equity / Assets": [
+        "Equity to Assets", "Equity/Assets",
+        "Common Equity/Assets",
+    ],
+    "LT Debt / Capital": [
+        "Long-Term Debt / Capital", "LT Debt/Capital",
+        "Long Term Debt / Capital",
+    ],
+    "EBIT / Interest Expense": [
+        "Interest Coverage", "Interest Coverage Ratio",
+        "Times Interest Earned", "EBIT/Interest Expense",
+    ],
+
+    # --- Ratios: Per Share ---
+    "Sales Per Share": ["Revenue Per Share"],
+    "Book Value Per Share": ["BV Per Share", "BVPS"],
+    "Tangible Book Value Per Share": ["Tangible BV Per Share", "TBVPS"],
+    "CFO Per Share": ["Cash Flow from Ops Per Share"],
+    "FCF Per Share": ["Free Cash Flow Per Share", "FCFPS"],
+    "Working Capital Per Share": ["WC Per Share"],
+
+    # --- Valuation: Trailing ---
+    "EV/Revenue": ["EV / Revenue", "Enterprise Value/Revenue", "EV/Rev"],
+    "Price/Sales": ["P/S", "P/S Ratio", "Price to Sales", "Price / Sales"],
+    "EV/EBITDA": ["EV / EBITDA", "Enterprise Value/EBITDA"],
+    "EV/EBIT": ["EV / EBIT", "Enterprise Value/EBIT"],
+    "EV/FCF": ["EV / FCF", "Enterprise Value/FCF"],
+    "P/E Ratio": [
+        "P/E", "Price/Earnings", "PE Ratio", "Price to Earnings",
+        "Price / Earnings",
+    ],
+    "Normalized P/E Ratio": [
+        "Normalized P/E", "Adj. P/E", "Adjusted P/E",
+        "Normalized PE Ratio",
+    ],
+    "P/B Ratio": [
+        "P/B", "Price/Book", "Price to Book", "Price / Book",
+    ],
+    "FCF Yield": [
+        "Free Cash Flow Yield", "FCF Yield %",
+    ],
+    "Earning Yield": [
+        "Earnings Yield", "Earning Yield %", "Earnings Yield %",
+    ],
+    "Trailing Dividend Yield": [
+        "Trailing Div Yield", "Dividend Yield (Trailing)",
+        "Trailing Dividend Yield %",
+    ],
+
+    # --- Valuation: Forward ---
+    "EV/Forward Revenue": [
+        "EV / Fwd Revenue", "Forward EV/Revenue",
+        "EV/Fwd Revenue", "EV / Forward Revenue",
+    ],
+    "EV/Forward EBITDA": [
+        "EV / Fwd EBITDA", "Forward EV/EBITDA",
+        "EV/Fwd EBITDA", "EV / Forward EBITDA",
+    ],
+    "EV/Forward EBIT": [
+        "EV / Fwd EBIT", "Forward EV/EBIT",
+        "EV/Fwd EBIT", "EV / Forward EBIT",
+    ],
+    "Forward P/E Ratio": [
+        "Fwd P/E", "Forward P/E", "Forward PE",
+        "Forward PE Ratio", "Fwd PE",
+    ],
+    "Forward Dividend Yield": [
+        "Fwd Dividend Yield", "Fwd Div Yield",
+        "Forward Div Yield",
+    ],
+    "Forward Earning Yield": [
+        "Fwd Earning Yield", "Fwd Earnings Yield",
+        "Forward Earnings Yield",
+    ],
+    "PEG Ratio": ["PEG"],
+
+    # --- Multiples ---
+    "NTM EV / Revenue": ["NTM EV/Revenue", "NTM EV / Rev"],
+    "NTM Price / Sales": ["NTM P/S", "NTM Price/Sales"],
+    "NTM EV / EBITDA": ["NTM EV/EBITDA"],
+    "NTM EV / EBIT": ["NTM EV/EBIT"],
+    "NTM Normalized P/E": ["NTM Norm P/E", "NTM Normalized PE"],
+    "NTM Mkt Cap / LFCF": ["NTM Mkt Cap/LFCF", "NTM MCap / LFCF"],
+    "NTM LFCF Yield": ["NTM LFCF Yield %"],
+    "NTM Dividend Yield": ["NTM Div Yield", "NTM Dividend Yield %"],
+    "LTM EV / Revenue": ["LTM EV/Revenue", "LTM EV / Rev"],
+    "LTM Price / Sales": ["LTM P/S", "LTM Price/Sales"],
+    "LTM EV / Gross Profit": ["LTM EV/Gross Profit"],
+    "LTM EV / EBITDA": ["LTM EV/EBITDA"],
+    "LTM EV / EBIT": ["LTM EV/EBIT"],
+    "LTM Diluted P/E": ["LTM Diluted PE", "LTM P/E (Diluted)"],
+    "LTM Price / Book": ["LTM P/B", "LTM Price/Book"],
+    "LTM Price / Tangible Book": ["LTM P/TB", "LTM Price/Tangible Book"],
+    "LTM EV / ULFCF": ["LTM EV/ULFCF"],
+    "LTM Mkt Cap / LFCF": ["LTM Mkt Cap/LFCF", "LTM MCap / LFCF"],
+    "LTM Dividend Yield": ["LTM Div Yield", "LTM Dividend Yield %"],
+    "TEV ($mm)": ["TEV", "Total Enterprise Value ($mm)", "Enterprise Value ($mm)"],
+    "Mkt Cap ($mm)": [
+        "Market Cap ($mm)", "Market Capitalization ($mm)", "Mkt Cap",
+        "Market Cap", "Market Capitalization",
+    ],
+
+    # --- Street Targets ---
+    "Price Close": ["Close Price", "Last Price", "Current Price"],
+    "Target Stock Price Mean": [
+        "Mean Target Price", "Avg Target Price", "Target Price Mean",
+        "Target Price (Mean)", "Consensus Target Price",
+    ],
+    "Target Stock Price Median": [
+        "Median Target Price", "Target Price Median",
+        "Target Price (Median)",
+    ],
+    "Target Stock Price High": [
+        "High Target Price", "Target Price High",
+        "Target Price (High)",
+    ],
+    "Target Stock Price Low": [
+        "Low Target Price", "Target Price Low",
+        "Target Price (Low)",
+    ],
+    "Target Stock Price (# Est)": [
+        "Number of Estimates", "# Estimates", "# of Estimates",
+        "Num Estimates",
+    ],
+    "Target Stock Price / Close Price": [
+        "Target / Close", "Target/Close Price",
+    ],
+    "# of Buys": ["Buys", "Buy", "Strong Buy"],
+    "# of Outperforms": ["Outperforms", "Outperform", "Overweight"],
+    "# of Holds": ["Holds", "Hold", "Neutral"],
+    "# of Underperforms": ["Underperforms", "Underperform", "Underweight"],
+    "# of Sells": ["Sells", "Sell", "Strong Sell"],
+
+    # --- Actuals & Forward ---
+    "EBT (Normalized)": ["Normalized EBT", "EBT Normalized", "Adj. EBT"],
+    "Net Income (Normalized)": [
+        "Normalized Net Income", "Net Income Normalized",
+        "Adj. Net Income",
+    ],
+    "EPS (Normalized)": [
+        "Normalized EPS", "EPS Normalized", "Adj. EPS",
+    ],
+    "EPS (GAAP)": ["GAAP EPS", "EPS GAAP", "Reported EPS"],
+    "Dividend Per Share": ["Dividends Per Share", "DPS"],
+    "Gross Margin": ["Gross Profit Margin", "Gross Margins"],
+    "Net Debt / EBITDA": [
+        "Net Debt/EBITDA", "ND/EBITDA", "Net Leverage",
+    ],
+    "ROE": ["Return on Equity", "Return On Equity"],
+    "ROA": ["Return on Assets", "Return On Assets"],
+    "TEV": ["Total Enterprise Value", "Enterprise Value"],
+    "Market Cap": ["Market Capitalization", "Mkt Cap"],
+
+    # --- QE Section 1 ---
+    "% EBITDA Margins": [
+        "EBITDA Margins", "EBITDA Margin %", "EBITDA Margin",
+        "% EBITDA Margin",
+    ],
+    "EBIT Margins": ["EBIT Margin", "EBIT Margin %", "EBIT Margins %"],
+    "Adjusted EPS": ["Adj. EPS", "Adj EPS", "Normalized EPS"],
+    "EPS GAAP": ["GAAP EPS", "EPS (GAAP)", "Reported EPS"],
+    "CFO": ["Cash from Operations", "Operating Cash Flow", "Cash From Ops"],
+    "CAPEX": ["Capital Expenditure", "Capital Expenditures", "CapEx"],
+    "FCF": ["Free Cash Flow", "Free cash flow"],
+
+    # --- QE Section 2 (Avg. Estimated / Actual triplets) ---
+    "Avg. Estimated Revenue": [
+        "Avg Estimated Revenue", "Average Estimated Revenue",
+        "Avg. Est. Revenue", "Consensus Revenue",
+    ],
+    "Actual Revenue": ["Revenue (Actual)", "Reported Revenue"],
+    "Avg. Estimated EBITDA": [
+        "Avg Estimated EBITDA", "Average Estimated EBITDA",
+        "Avg. Est. EBITDA", "Consensus EBITDA",
+    ],
+    "Actual EBITDA": ["EBITDA (Actual)", "Reported EBITDA"],
+    "Avg. Estimated EBIT": [
+        "Avg Estimated EBIT", "Average Estimated EBIT",
+        "Avg. Est. EBIT",
+    ],
+    "Actual EBIT": ["EBIT (Actual)", "Reported EBIT"],
+    "Avg. Estimated Net Income": [
+        "Avg Estimated Net Income", "Average Estimated Net Income",
+        "Avg. Est. Net Income",
+    ],
+    "Actual Net Income": ["Net Income (Actual)", "Reported Net Income"],
+    "Avg. Estimated Adjusted EPS": [
+        "Avg Estimated Adjusted EPS", "Average Estimated Adj EPS",
+        "Avg. Est. Adjusted EPS", "Consensus EPS",
+    ],
+    "Actual Adjusted EPS": [
+        "Adjusted EPS (Actual)", "Reported Adjusted EPS",
+    ],
+    "Avg. Estimated EPS GAAP": [
+        "Avg Estimated EPS GAAP", "Average Estimated EPS GAAP",
+        "Avg. Est. EPS GAAP",
+    ],
+    "Actual EPS GAAP": ["EPS GAAP (Actual)", "Reported EPS GAAP"],
+    "Avg. Estimated CFO": [
+        "Avg Estimated CFO", "Average Estimated CFO",
+        "Avg. Est. CFO",
+    ],
+    "Actual CFO": ["CFO (Actual)", "Reported CFO"],
+    "Avg. Estimated CAPEX": [
+        "Avg Estimated CAPEX", "Average Estimated CAPEX",
+        "Avg. Est. CAPEX",
+    ],
+    "Actual CAPEX": ["CAPEX (Actual)", "Reported CAPEX"],
+    "Avg. Estimated FCF": [
+        "Avg Estimated FCF", "Average Estimated FCF",
+        "Avg. Est. FCF",
+    ],
+    "Actual FCF": ["FCF (Actual)", "Reported FCF"],
 }

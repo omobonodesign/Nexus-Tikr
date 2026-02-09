@@ -56,6 +56,7 @@ def run_pipeline(
     output_dir: str = ".",
     user_ticker: Optional[str] = None,
     user_sector: Optional[str] = None,
+    force: bool = False,
 ) -> tuple[PipelineContext, list[str]]:
     """Run the complete NEXUS-TIKR v2.1 processing pipeline.
 
@@ -139,8 +140,8 @@ def run_pipeline(
                 logger.warning("Adaptive parsing failed for %s: %s", f.filename, e)
 
         # Check label health
-        logger.info("STEP 9: Checking label health...")
-        if ctx.label_health.health_score < 0.70:
+        logger.info("STEP 9: Checking label health (score: %.2f)...", ctx.label_health.health_score)
+        if ctx.label_health.health_score < 0.70 and not force:
             raise PipelineAbortError(
                 "3",
                 f"Label health CRITICAL ({ctx.label_health.health_score:.2f})"
